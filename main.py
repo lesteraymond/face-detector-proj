@@ -142,11 +142,13 @@ class MainFrame:
         x, y, w, h = self.faces[0]
         face = f[y : y + h, x : x + w]
 
-        rgb = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
+        resize = cv2.resize(face, (0, 0), fx=1.5, fy=1.5)
+        rgb = cv2.cvtColor(resize, cv2.COLOR_BGR2RGB)
         img = ImageTk.PhotoImage(Image.fromarray(rgb))
 
         self.preview_window = tk.Toplevel()
         self.preview_window.title("Preview")
+        # self.preview_window.protocol("<KeyPress>", self.key_press_hander_preview_window)
 
         self.preview_image_container = tk.Label(self.preview_window)
         self.preview_image_container.img = img
@@ -156,11 +158,20 @@ class MainFrame:
         self.save_button = tk.Button(
             self.preview_window,
             text="Save",
-            width=50,
+            width=30,
             font=("Arial", 10),
             command=self.flush_image,
         )
-        self.save_button.pack(pady=10)
+        self.save_button.pack(side="left", padx=10, pady=10)
+
+        self.capture_again_button = tk.Button(
+            self.preview_window,
+            text="Capture Again",
+            width=30,
+            font=("Arial", 10),
+            command=self.preview_window.destroy,
+        )
+        self.capture_again_button.pack(side="right", padx=10, pady=10)
 
     def on_close(self):
         ask = messagebox.askyesno(title="Quit?", message="Do you want to quit?")
@@ -180,6 +191,18 @@ class MainFrame:
             self.on_close()
         elif keysym == "c":
             self.capture_button_click()
+
+    # def key_press_hander_preview_window(self, event):
+    #     char = event.char
+    #     keysym = event.keysym
+    #     keycode = event.keycode
+
+    #     print(f"Keysym: {keysym} - Keycode: {keycode}")
+    #     print(self.show_rec_value.get())
+    #     print("HANNI PHAM")
+
+    #     if keysym == "Escape":
+    #         self.preview_window.destroy()
 
     def show(self):
         self.root.mainloop()
