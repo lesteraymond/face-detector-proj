@@ -5,6 +5,7 @@ class Capture:
     def __init__(self):
         self.dataset_path = "dataset/"
         self.pref = 1
+        ##
 
     def set_frame(self, fr):
         self.frame = fr
