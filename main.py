@@ -56,6 +56,20 @@ class MainFrame:
         )
         self.capture_button_shortcut.place(x=100, y=460, width=100)
 
+        self.train_button_shortcut = tk.Label(
+            self.root,
+            font=("Arial", 10),
+            text="Key: <t>",
+        )
+        self.train_button_shortcut.place(x=350, y=460, width=100)
+
+        self.detect_button_shortcut = tk.Label(
+            self.root,
+            font=("Arial", 10),
+            text="Key: <d>",
+        )
+        self.detect_button_shortcut.place(x=600, y=460, width=100)
+
         # self.train_button = tk.Button(self.root, font=("Arial", 10), text="TRAIN")
         # self.train_button.place(x=350, y=430, width=100)
 
