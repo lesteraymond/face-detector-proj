@@ -1,9 +1,11 @@
 import tkinter as tk
 import cv2
+import capture_dataset
+import train_model
+import os
 from PIL import ImageTk, Image
 from tkinter import messagebox
 from random import randint
-import capture_dataset
 
 
 class MainFrame:
@@ -42,7 +44,9 @@ class MainFrame:
         )
         self.capture_button.place(x=100, y=430, width=100)
 
-        self.train_button = tk.Button(self.root, font=("Arial", 10), text="TRAIN")
+        self.train_button = tk.Button(
+            self.root, font=("Arial", 10), text="TRAIN", command=self.train_button_click
+        )
         self.train_button.place(x=350, y=430, width=100)
 
         self.detect_button = tk.Button(self.root, font=("Arial", 10), text="DETECT")
@@ -75,19 +79,6 @@ class MainFrame:
 
         # self.detect_button = tk.Button(self.root, font=("Arial", 10), text="DETECT")
         # self.detect_button.place(x=600, y=430, width=100)
-
-        self.messages = [
-            "Walang face na nakita. Paki try ulit.",
-            "Hindi ka na detect ng camera. Ayusin mo lang pwesto mo.",
-            "No face found. Check mo lighting or distance.",
-            "hindi ka makita. Try mo lumapit konti.",
-            "Camera cannot detect any face. Please try again.",
-            "No face detected. Baka natakpan yung camera.",
-            "Wala pa ring face. Ayusin mo lang angle mo.",
-            "Face not detected. Try mo i-adjust yung position mo.",
-            "Hindi nag register ang face mo. Try mo ulit.",
-            "No face detected. Make sure nasa frame ka.",
-        ]
 
         self.update_video_frame()
 
@@ -133,13 +124,52 @@ class MainFrame:
 
     def capture_button_click(self):
         if self.no_face_detected:
+            error_messages = [
+                "Walang face na nakita. Paki try ulit.",
+                "Hindi ka na detect ng camera. Ayusin mo lang pwesto mo.",
+                "No face found. Check mo lighting or distance.",
+                "hindi ka makita. Try mo lumapit konti.",
+                "Camera cannot detect any face. Please try again.",
+                "No face detected. Baka natakpan yung camera.",
+                "Wala pa ring face. Ayusin mo lang angle mo.",
+                "Face not detected. Try mo i-adjust yung position mo.",
+                "Hindi nag register ang face mo. Try mo ulit.",
+                "No face detected. Make sure nasa frame ka.",
+            ]
             messagebox.showerror(
                 title="ERROR",
-                message=self.messages[randint(0, len(self.messages))],
+                message=error_messages[randint(0, len(error_messages))],
             )
         else:
             # self.flush_image()
             self.show_image_preview_window()
+
+    def train_button_click(self):
+        files = os.listdir("dataset/")
+
+        if len(files) == 0:
+            messagebox.showerror("ERROR", "Walang laman ung dataset folder huhuhu")
+            return
+
+        if len(files) < 10:
+            error_messages = [
+                "Kulang pictures. Kailangan 10 o more.",
+                "Medyo konti pa images mo, dagdagan mo muna.",
+                "Dataset too small. Collect at least 10 pics.",
+                "Hindi pedeng magtrain, kulang images.",
+                "Add more photos muna bago magtrain.",
+                "Kulang pa yung pictures. Try mo magcapture ng madami.",
+                "Training failed. Need 10 or more images.",
+                "Konti pa yung images. Dagdagan mo bago magtrain.",
+                "Cannot proceed. Kulang pictures mo.",
+                "Add more pictures. Minimum 10 required para magtrain.",
+            ]
+            messagebox.showerror(
+                "ERROR", error_messages[randint(0, len(error_messages))]
+            )
+        else:
+            train = train_model.Train()
+            train.save_model()
 
     def flush_image(self):
         r, f = self.video_capture.read()
@@ -148,6 +178,7 @@ class MainFrame:
         self.cap.set_frame(f)
         self.cap.set_faces(self.faces)
         self.cap.write()
+        self.preview_window.destroy()
 
     def show_image_preview_window(self):
         r, f = self.video_capture.read()
