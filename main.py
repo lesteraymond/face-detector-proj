@@ -120,7 +120,7 @@ class MainFrame:
     def capture_button_click(self):
         if self.no_face_detected:
             messagebox.showerror(
-                title="NO FACE DETECTED ERROR",
+                title="ERROR",
                 message=self.messages[randint(0, len(self.messages))],
             )
         else:
