@@ -2,7 +2,7 @@ import tkinter as tk
 import cv2
 from PIL import ImageTk, Image
 from tkinter import messagebox
-
+from random import randint
 import capture_dataset
 
 
@@ -48,6 +48,19 @@ class MainFrame:
         self.detect_button = tk.Button(self.root, font=("Arial", 10), text="DETECT")
         self.detect_button.place(x=600, y=430, width=100)
 
+        self.messages = [
+            "Walang face na nakita. Paki try ulit.",
+            "Hindi ka na detect ng camera. Ayusin mo lang pwesto mo.",
+            "No face found. Check mo lighting or distance.",
+            "hindi ka makita. Try mo lumapit konti.",
+            "Camera cannot detect any face. Please try again.",
+            "No face detected. Baka natakpan yung camera.",
+            "Wala pa ring face. Ayusin mo lang angle mo.",
+            "Face not detected. Try mo i-adjust yung position mo.",
+            "Hindi nag register ang face mo. Try mo ulit.",
+            "No face detected. Make sure nasa frame ka.",
+        ]
+
         self.update_video_frame()
 
     def update_video_frame(self):
@@ -55,21 +68,23 @@ class MainFrame:
         self.f = cv2.flip(self.f, 1)
 
         gray = cv2.cvtColor(self.f, cv2.COLOR_BGR2GRAY)
-        faces = self.face_cascade.detectMultiScale(gray, 1.1, 5)
+        self.faces = self.face_cascade.detectMultiScale(gray, 1.1, 5)
 
         rec_pos_x = 0
         rec_pos_y = 0
-        if len(faces) > 0:
+        if len(self.faces) > 0:
             status_text = "Face Detected"
-            for x, y, w, h in faces:
+            for x, y, w, h in self.faces:
                 rec_pos_x = x
                 rec_pos_y = y
                 if self.show_rec_value.get() == 1:
                     cv2.rectangle(self.f, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                    self.no_face_detected = False
 
-                # print(self.show_rec_value)
+            # print(self.show_rec_value)
         else:
             status_text = "No Face Detected"
+            self.no_face_detected = True
 
         if self.show_rec_value.get() == 1:
             cv2.putText(
@@ -89,8 +104,18 @@ class MainFrame:
         self.root.after(10, self.update_video_frame)
 
     def capture_button_click(self):
-        self.cap.set_image(self.f)
-        self.cap.write()
+        if self.no_face_detected:
+            messagebox.showerror(
+                title="NO FACE DETECTED ERROR",
+                message=self.messages[randint(0, len(self.messages) + 1)],
+            )
+        else:
+            self.cap.set_frame(self.f)
+            self.cap.set_faces(self.faces)
+            self.cap.write()
+
+    def show_image_preview_window(self):
+        self.preview_window = tk.Toplevel()
 
     def on_close(self):
         ask = messagebox.askyesno(title="Quit?", message="Do you want to quit?")
