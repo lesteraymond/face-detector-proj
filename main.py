@@ -48,6 +48,20 @@ class MainFrame:
         self.detect_button = tk.Button(self.root, font=("Arial", 10), text="DETECT")
         self.detect_button.place(x=600, y=430, width=100)
 
+        #######
+        self.capture_button_shortcut = tk.Label(
+            self.root,
+            font=("Arial", 10),
+            text="Key: <c>",
+        )
+        self.capture_button_shortcut.place(x=100, y=460, width=100)
+
+        # self.train_button = tk.Button(self.root, font=("Arial", 10), text="TRAIN")
+        # self.train_button.place(x=350, y=430, width=100)
+
+        # self.detect_button = tk.Button(self.root, font=("Arial", 10), text="DETECT")
+        # self.detect_button.place(x=600, y=430, width=100)
+
         self.messages = [
             "Walang face na nakita. Paki try ulit.",
             "Hindi ka na detect ng camera. Ayusin mo lang pwesto mo.",
@@ -107,7 +121,7 @@ class MainFrame:
         if self.no_face_detected:
             messagebox.showerror(
                 title="NO FACE DETECTED ERROR",
-                message=self.messages[randint(0, len(self.messages) + 1)],
+                message=self.messages[randint(0, len(self.messages))],
             )
         else:
             self.cap.set_frame(self.f)
@@ -133,6 +147,8 @@ class MainFrame:
 
         if keysym == "q":
             self.on_close()
+        elif keysym == "c":
+            self.capture_button_click()
 
     def show(self):
         self.root.mainloop()
