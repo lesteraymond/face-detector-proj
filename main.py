@@ -118,19 +118,22 @@ class MainFrame:
         self.root.after(10, self.update_video_frame)
 
     def capture_button_click(self):
-        self.show_image_preview_window()
         if self.no_face_detected:
             messagebox.showerror(
                 title="ERROR",
                 message=self.messages[randint(0, len(self.messages))],
             )
         else:
-            r, f = self.video_capture.read()
-            f = cv2.flip(f, 1)
+            # self.flush_image()
+            self.show_image_preview_window()
 
-            self.cap.set_frame(f)
-            self.cap.set_faces(self.faces)
-            self.cap.write()
+    def flush_image(self):
+        r, f = self.video_capture.read()
+        f = cv2.flip(f, 1)
+
+        self.cap.set_frame(f)
+        self.cap.set_faces(self.faces)
+        self.cap.write()
 
     def show_image_preview_window(self):
         r, f = self.video_capture.read()
@@ -149,6 +152,15 @@ class MainFrame:
         self.preview_image_container.img = img
         self.preview_image_container.config(image=img)
         self.preview_image_container.pack(padx=10, pady=10)
+
+        self.save_button = tk.Button(
+            self.preview_window,
+            text="Save",
+            width=50,
+            font=("Arial", 10),
+            command=self.flush_image,
+        )
+        self.save_button.pack(pady=10)
 
     def on_close(self):
         ask = messagebox.askyesno(title="Quit?", message="Do you want to quit?")
