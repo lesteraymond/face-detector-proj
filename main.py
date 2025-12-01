@@ -93,12 +93,12 @@ class MainFrame:
         rec_pos_y = 0
         if len(self.faces) > 0:
             status_text = "Face Detected"
+            self.no_face_detected = False
             for x, y, w, h in self.faces:
                 rec_pos_x = x
                 rec_pos_y = y
                 if self.show_rec_value.get() == 1:
                     cv2.rectangle(self.f, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                    self.no_face_detected = False
 
             # print(self.show_rec_value)
         else:
@@ -193,30 +193,33 @@ class MainFrame:
 
         self.preview_window = tk.Toplevel()
         self.preview_window.title("Preview")
+        # self.preview_window.geometry("500x500")
         # self.preview_window.protocol("<KeyPress>", self.key_press_hander_preview_window)
 
         self.preview_image_container = tk.Label(self.preview_window)
         self.preview_image_container.img = img
         self.preview_image_container.config(image=img)
-        self.preview_image_container.pack(padx=10, pady=10)
+        self.preview_image_container.pack(pady=0)
 
         self.save_button = tk.Button(
             self.preview_window,
             text="Save",
-            width=30,
+            width=20,
             font=("Arial", 10),
             command=self.flush_image,
         )
-        self.save_button.pack(side="left", padx=10, pady=10)
+        self.save_button.pack(side="left", padx=10, pady=0)
 
         self.capture_again_button = tk.Button(
             self.preview_window,
             text="Capture Again",
-            width=30,
+            width=20,
             font=("Arial", 10),
             command=self.preview_window.destroy,
         )
-        self.capture_again_button.pack(side="right", padx=10, pady=10)
+        self.capture_again_button.pack(side="right", padx=10, pady=0)
+
+        # print(self.preview_window.winfo_height())
 
     def on_close(self):
         ask = messagebox.askyesno(title="Quit?", message="Do you want to quit?")
