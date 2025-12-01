@@ -16,6 +16,7 @@ class MainFrame:
         self.face_cascade = cv2.CascadeClassifier(
             cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
         )
+        self.detect = False
 
         self.root = tk.Tk()
         self.root.title("FACE DETECTOR")
@@ -49,6 +50,14 @@ class MainFrame:
         )
         cb_show_txt.pack(side="left", padx=10)
 
+        clear_dataset_folder_button = tk.Button(
+            self.root,
+            font=("Arial", 7),
+            text="CLEAR DATASET",
+            command=self.clear_dataset_folder_button_click,
+        )
+        clear_dataset_folder_button.place(x=100, y=400, width=100, height=28)
+
         capture_button = tk.Button(
             self.root,
             font=("Arial", 10),
@@ -62,8 +71,21 @@ class MainFrame:
         )
         train_button.place(x=350, y=430, width=100)
 
-        detect_button = tk.Button(self.root, font=("Arial", 10), text="DETECT")
+        detect_button = tk.Button(
+            self.root,
+            font=("Arial", 10),
+            text="DETECT",
+            command=self.detect_button_click,
+        )
         detect_button.place(x=600, y=430, width=100)
+
+        stop_detect_button = tk.Button(
+            self.root,
+            font=("Arial", 10),
+            text="STOP",
+            command=self.stop_detect_button_click,
+        )
+        stop_detect_button.place(x=600, y=400, width=100)
 
         #######
         capture_button_shortcut = tk.Label(
@@ -100,31 +122,61 @@ class MainFrame:
         self.f = cv2.flip(self.f, 1)
 
         gray = cv2.cvtColor(self.f, cv2.COLOR_BGR2GRAY)
-        self.faces = self.face_cascade.detectMultiScale(gray, 1.1, 5)
+        faces = self.face_cascade.detectMultiScale(gray, 1.1, 5)
 
         rec_pos_x = 0
         rec_pos_y = 0
-        if len(self.faces) > 0:
+        if len(faces) > 0:
             status_text = "Face Detected"
             self.no_face_detected = False
-            for x, y, w, h in self.faces:
+            for x, y, w, h in faces:
                 rec_pos_x = x
                 rec_pos_y = y
-                if self.show_rec_value.get() == 1:
-                    cv2.rectangle(self.f, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+                if self.detect:
+                    if os.path.exists("model.yml"):
+                        recog = cv2.face.LBPHFaceRecognizer_create()
+                        recog.read("model.yml")
+
+                        names = {0: "raymond"}
+
+                        face_r = gray[y : y + h, x : x + w]
+                        label, confidence = recog.predict(face_r)
+
+                        if self.show_rec_value.get() == 1:
+                            cv2.rectangle(
+                                self.f, (x, y), (x + w, y + h), (0, 255, 0), 2
+                            )
+
+                        status_text = names.get(label, "unknown")
+                        print(status_text, confidence)
+
+                        if self.show_txt_value.get() == 1:
+                            cv2.putText(
+                                self.f,
+                                f"{status_text}: {float('{:.2f}'.format(confidence))}%",
+                                (x, y - 10),
+                                cv2.FONT_HERSHEY_SIMPLEX,
+                                0.8,
+                                (0, 255, 0),
+                                2,
+                            )
 
             # print(self.show_rec_value)
         else:
             status_text = "No Face Detected"
             self.no_face_detected = True
 
-        if self.show_txt_value.get() == 1:
+        if self.show_rec_value.get() == 1 and not self.detect:
+            cv2.rectangle(self.f, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+        if self.show_txt_value.get() == 1 and not self.detect:
             cv2.putText(
                 self.f,
                 status_text,
-                (rec_pos_x - 8, rec_pos_y - 10),
+                (rec_pos_x, rec_pos_y - 10),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                1,
+                0.8,
                 (0, 0, 255),
                 2,
             )
@@ -136,6 +188,7 @@ class MainFrame:
         self.root.after(10, self.update_video_frame)
 
     def capture_button_click(self):
+        self.detect = False
         if self.no_face_detected:
             error_messages = [
                 "Walang face na nakita. Paki try ulit.",
@@ -181,24 +234,70 @@ class MainFrame:
                 "ERROR", error_messages[randint(0, len(error_messages))]
             )
         else:
+            if os.path.exists("model.yml"):
+                os.remove("model.yml")
+            print("Training model..... please wait...")
             train = train_model.Train()
             train.save_model()
+            print("Training model done!")
+
+    def detect_button_click(self):
+        self.show_rec_value.set(1)
+        self.show_txt_value.set(1)
+
+        if not os.path.exists("model.yml"):
+            messagebox.showerror("Please train model first!")
+            return
+
+        if len(os.listdir("dataset/")) == 0:
+            messagebox.showerror("ERROR", "Walang laman ung dataset folder huhuhu")
+            return
+
+        self.detect = True
+
+    def stop_detect_button_click(self):
+        self.detect = False
+
+    def clear_dataset_folder_button_click(self):
+        if os.path.exists("model.yml"):
+            os.remove("model.yml")
+
+        if len(os.listdir("dataset/")) > 0:
+            if messagebox.askyesno("Delete?", "Do you want to continue?"):
+                for file in os.listdir("dataset/"):
+                    os.remove(f"dataset/{file}")
+                    print(f"{f'dataset/{file}'} Removed!")
+
+                messagebox.showinfo("Done", "Dataset folder was cleared!")
+        else:
+            messagebox.showwarning("Delete?", "Dataset folder is already empty!")
 
     def flush_image(self):
-        r, f = self.video_capture.read()
-        f = cv2.flip(f, 1)
-
-        self.cap.set_frame(f)
-        self.cap.set_faces(self.faces)
-        self.cap.write(self.file_name_entry.get())
+        # r, f = self.video_capture.read()
+        # f = cv2.flip(f, 1)
+        self.cap.set_face(self.prev_face)
+        self.cap.write(self.person_name_entry.get())
         self.preview_window.destroy()
+
+        # if not self.no_face_detected:
+        #   self.cap.set_frame(self.prev_frame)
+
+        # else:
+        #     messagebox.showerror("ERROR", "No Face Detected!")
+        #     return
 
     def show_image_preview_window(self):
         r, f = self.video_capture.read()
         f = cv2.flip(f, 1)
 
-        x, y, w, h = self.faces[0]
+        gray = cv2.cvtColor(f, cv2.COLOR_BGR2GRAY)
+        faces = self.face_cascade.detectMultiScale(gray, 1.1, 5)
+
+        x, y, w, h = faces[0]
         face = f[y : y + h, x : x + w]
+
+        # self.prev_frame = f
+        self.prev_face = face
 
         resize = cv2.resize(face, (400, 400), interpolation=cv2.INTER_CUBIC)
         rgb = cv2.cvtColor(resize, cv2.COLOR_BGR2RGB)
@@ -214,12 +313,12 @@ class MainFrame:
         preview_image_container.config(image=img)
         preview_image_container.pack(padx=5, pady=5)
 
-        file_name_label = tk.Label(self.preview_window, text="ENTER FILENAME")
-        file_name_label.pack()
+        person_name_label = tk.Label(self.preview_window, text="PERSON NAME:")
+        person_name_label.pack()
 
-        self.file_name_entry = tk.Entry(self.preview_window)
-        self.file_name_entry.focus()
-        self.file_name_entry.pack()
+        self.person_name_entry = tk.Entry(self.preview_window)
+        self.person_name_entry.focus()
+        self.person_name_entry.pack()
         # self.save_settings_label = tk.Label(
         #     self.preview_window, text="SAVE SETTINGS:", font=("Arial", 9)
         # )
@@ -261,8 +360,8 @@ class MainFrame:
 
         # print(self.preview_window.winfo_height())
 
-    def clear_entry(self):
-        self.file_name_entry.delete("1.0", "end")
+    # def clear_entry(self):
+    #     self.person_name_entry.delete("1.0", "end")
 
     def on_close(self):
         ask = messagebox.askyesno(title="Quit?", message="Do you want to quit?")
@@ -282,6 +381,10 @@ class MainFrame:
             self.on_close()
         elif keysym == "c":
             self.capture_button_click()
+        elif keysym == "t":
+            self.train_button_click()
+        elif keysym == "d":
+            self.detect_button_click()
 
     # def key_press_hander_preview_window(self, event):
     #     char = event.char
