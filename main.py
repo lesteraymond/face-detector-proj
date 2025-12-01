@@ -21,58 +21,71 @@ class MainFrame:
         self.root.title("FACE DETECTOR")
         self.root.geometry("800x500")
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
-        self.root.bind("<KeyPress>", self.key_press_hander)
+        self.root.bind("<KeyPress>", self.key_press_handler)
 
         self.video_frame = tk.Label(self.root, height=350)
         self.video_frame.pack(padx=10, pady=10)
 
         self.show_rec_value = tk.IntVar()
+        self.show_txt_value = tk.IntVar()
+        # create_folder_value = tk.IntVar()
 
-        self.cb_show_rec = tk.Checkbutton(
-            self.root,
+        show_stuffs_container = tk.Frame(self.root)
+        show_stuffs_container.pack(pady=5)
+
+        cb_show_rec = tk.Checkbutton(
+            show_stuffs_container,
             text="SHOW RECTANGLE",
             font=("Arial", 10),
             variable=self.show_rec_value,
         )
-        self.cb_show_rec.pack(pady=5)
+        cb_show_rec.pack(side="left")
 
-        self.capture_button = tk.Button(
+        cb_show_txt = tk.Checkbutton(
+            show_stuffs_container,
+            text="SHOW TEXT",
+            font=("Arial", 10),
+            variable=self.show_txt_value,
+        )
+        cb_show_txt.pack(side="left", padx=10)
+
+        capture_button = tk.Button(
             self.root,
             font=("Arial", 10),
             text="CAPTURE",
             command=self.capture_button_click,
         )
-        self.capture_button.place(x=100, y=430, width=100)
+        capture_button.place(x=100, y=430, width=100)
 
-        self.train_button = tk.Button(
+        train_button = tk.Button(
             self.root, font=("Arial", 10), text="TRAIN", command=self.train_button_click
         )
-        self.train_button.place(x=350, y=430, width=100)
+        train_button.place(x=350, y=430, width=100)
 
-        self.detect_button = tk.Button(self.root, font=("Arial", 10), text="DETECT")
-        self.detect_button.place(x=600, y=430, width=100)
+        detect_button = tk.Button(self.root, font=("Arial", 10), text="DETECT")
+        detect_button.place(x=600, y=430, width=100)
 
         #######
-        self.capture_button_shortcut = tk.Label(
+        capture_button_shortcut = tk.Label(
             self.root,
             font=("Arial", 10),
             text="Key: <c>",
         )
-        self.capture_button_shortcut.place(x=100, y=460, width=100)
+        capture_button_shortcut.place(x=100, y=460, width=100)
 
-        self.train_button_shortcut = tk.Label(
+        train_button_shortcut = tk.Label(
             self.root,
             font=("Arial", 10),
             text="Key: <t>",
         )
-        self.train_button_shortcut.place(x=350, y=460, width=100)
+        train_button_shortcut.place(x=350, y=460, width=100)
 
-        self.detect_button_shortcut = tk.Label(
+        detect_button_shortcut = tk.Label(
             self.root,
             font=("Arial", 10),
             text="Key: <d>",
         )
-        self.detect_button_shortcut.place(x=600, y=460, width=100)
+        detect_button_shortcut.place(x=600, y=460, width=100)
 
         # self.train_button = tk.Button(self.root, font=("Arial", 10), text="TRAIN")
         # self.train_button.place(x=350, y=430, width=100)
@@ -105,7 +118,7 @@ class MainFrame:
             status_text = "No Face Detected"
             self.no_face_detected = True
 
-        if self.show_rec_value.get() == 1:
+        if self.show_txt_value.get() == 1:
             cv2.putText(
                 self.f,
                 status_text,
@@ -116,10 +129,10 @@ class MainFrame:
                 2,
             )
 
-        self.rgb = cv2.cvtColor(self.f, cv2.COLOR_BGR2RGB)
-        self.img = ImageTk.PhotoImage(Image.fromarray(self.rgb))
-        self.video_frame.img = self.img
-        self.video_frame.config(image=self.img)
+        rgb = cv2.cvtColor(self.f, cv2.COLOR_BGR2RGB)
+        img = ImageTk.PhotoImage(Image.fromarray(rgb))
+        self.video_frame.img = img
+        self.video_frame.config(image=img)
         self.root.after(10, self.update_video_frame)
 
     def capture_button_click(self):
@@ -177,7 +190,7 @@ class MainFrame:
 
         self.cap.set_frame(f)
         self.cap.set_faces(self.faces)
-        self.cap.write()
+        self.cap.write(self.file_name_entry.get())
         self.preview_window.destroy()
 
     def show_image_preview_window(self):
@@ -187,46 +200,76 @@ class MainFrame:
         x, y, w, h = self.faces[0]
         face = f[y : y + h, x : x + w]
 
-        resize = cv2.resize(face, (0, 0), fx=1.5, fy=1.5)
+        resize = cv2.resize(face, (400, 400), interpolation=cv2.INTER_CUBIC)
         rgb = cv2.cvtColor(resize, cv2.COLOR_BGR2RGB)
         img = ImageTk.PhotoImage(Image.fromarray(rgb))
 
         self.preview_window = tk.Toplevel()
         self.preview_window.title("Preview")
-        # self.preview_window.geometry("500x500")
+        self.preview_window.geometry("400x500")
         # self.preview_window.protocol("<KeyPress>", self.key_press_hander_preview_window)
 
-        self.preview_image_container = tk.Label(self.preview_window)
-        self.preview_image_container.img = img
-        self.preview_image_container.config(image=img)
-        self.preview_image_container.pack(pady=0)
+        preview_image_container = tk.Label(self.preview_window)
+        preview_image_container.img = img
+        preview_image_container.config(image=img)
+        preview_image_container.pack(padx=5, pady=5)
 
-        self.save_button = tk.Button(
+        file_name_label = tk.Label(self.preview_window, text="ENTER FILENAME")
+        file_name_label.pack()
+
+        self.file_name_entry = tk.Entry(self.preview_window)
+        self.file_name_entry.focus()
+        self.file_name_entry.pack()
+        # self.save_settings_label = tk.Label(
+        #     self.preview_window, text="SAVE SETTINGS:", font=("Arial", 9)
+        # )
+        # self.save_settings_label.place(x=2, y=410)
+
+        # self.folder_name_label = tk.Label(
+        #     self.preview_window, text="FOLDER NAME:", font=("Arial", 8)
+        # )
+        # self.folder_name_label.place(x=2, y=430)
+
+        # self.folder_name_entry = tk.Entry(self.preview_window)
+        # self.folder_name_entry.place(x=90, y=429)
+
+        # self.folder_name_cb = tk.Checkbutton(
+        #     self.preview_window,
+        #     text="CREATE FOLDER",
+        #     font=("Arial", 8),
+        #     variable=self.create_folder_value,
+        # )
+        # self.folder_name_cb.place(x=220, y=426)
+
+        save_button = tk.Button(
             self.preview_window,
             text="Save",
             width=20,
             font=("Arial", 10),
             command=self.flush_image,
         )
-        self.save_button.pack(side="left", padx=10, pady=0)
+        save_button.pack(side="left", padx=5, pady=5)
 
-        self.capture_again_button = tk.Button(
+        capture_again_button = tk.Button(
             self.preview_window,
             text="Capture Again",
             width=20,
             font=("Arial", 10),
             command=self.preview_window.destroy,
         )
-        self.capture_again_button.pack(side="right", padx=10, pady=0)
+        capture_again_button.pack(side="right", padx=5, pady=5)
 
         # print(self.preview_window.winfo_height())
+
+    def clear_entry(self):
+        self.file_name_entry.delete("1.0", "end")
 
     def on_close(self):
         ask = messagebox.askyesno(title="Quit?", message="Do you want to quit?")
         if ask:
             self.root.destroy()
 
-    def key_press_hander(self, event):
+    def key_press_handler(self, event):
         char = event.char
         keysym = event.keysym
         keycode = event.keycode
