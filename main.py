@@ -17,6 +17,8 @@ class MainFrame:
         self.face_cascade = cv2.CascadeClassifier(
             cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
         )
+        self.recog = None
+        self.names = {0: "raymond"}
         self.detect = False
 
         self.root = tk.Tk()
@@ -139,26 +141,19 @@ class MainFrame:
                 rec_height = h
 
                 if self.detect:
-                    if os.path.exists("model.yml"):
-                        recog = cv2.face.LBPHFaceRecognizer_create()
-                        recog.read("model.yml")
-
+                    if self.recog:
                         names = {0: "raymond"}
 
                         face_r = gray[y : y + h, x : x + w]
-                        label, confidence = recog.predict(face_r)
-
-                        # if confidence < 70:
-                        #     status_text = "raymond"
-                        # else:
-                        #     status_text = "unknown"
+                        label, confidence = self.recog.predict(face_r)
 
                         if confidence < 60:
                             status_text = names.get(label, "unknown")
                         else:
                             status_text = "unknown"
 
-                        print(status_text, confidence)
+                        print(f"status_text: {status_text}")
+                        print(f"confidence: {confidence}")
 
                         if self.show_rec_value.get() == 1:
                             cv2.rectangle(
@@ -222,22 +217,26 @@ class MainFrame:
                 "Hindi nag register ang face mo. Try mo ulit.",
                 "No face detected. Make sure nasa frame ka.",
             ]
+
+            message = error_messages[randint(0, len(error_messages) - 1)]
+            print(f"ERROR: {message}")
             messagebox.showerror(
                 title="ERROR",
-                message=error_messages[randint(0, len(error_messages) - 1)],
+                message=message,
             )
+            return
         else:
             # self.flush_image()
             self.show_image_preview_window()
 
     def train_button_click(self):
         dataset_folder = os.listdir("dataset")
+        if len(dataset_folder) == 0:
+            messagebox.showerror("ERROR", "Walang laman ung dataset folder huhuhu")
+            return
 
         for folder in dataset_folder:
             folder_path = os.listdir(f"dataset/{folder}")
-            if len(dataset_folder) == 0:
-                messagebox.showerror("ERROR", "Walang laman ung dataset folder huhuhu")
-                return
 
             if len(folder_path) < 10:
                 error_messages = [
@@ -252,9 +251,9 @@ class MainFrame:
                     "Cannot proceed. Kulang pictures mo.",
                     "Add more pictures. Minimum 10 required para magtrain.",
                 ]
-                messagebox.showerror(
-                    "ERROR", error_messages[randint(0, len(error_messages) - 1)]
-                )
+                message = error_messages[randint(0, len(error_messages) - 1)]
+                print(f"ERROR: {message}")
+                messagebox.showerror(title="ERROR", message=message)
                 return
             else:
                 if os.path.exists("model.yml"):
@@ -269,13 +268,17 @@ class MainFrame:
         self.show_txt_value.set(1)
 
         if not os.path.exists("model.yml"):
+            print("ERROR: Please train model first!")
             messagebox.showerror("ERROR", "Please train model first!")
             return
 
         if len(os.listdir("dataset/")) == 0:
+            print("ERROR: Walang laman ung dataset folder huhuhu")
             messagebox.showerror("ERROR", "Walang laman ung dataset folder huhuhu")
             return
 
+        self.recog = cv2.face.LBPHFaceRecognizer_create()
+        self.recog.read("model.yml")
         self.detect = True
 
     def stop_detect_button_click(self):
@@ -329,7 +332,7 @@ class MainFrame:
         self.preview_window = tk.Toplevel()
         self.preview_window.title("Preview")
         self.preview_window.geometry("400x500")
-        # self.preview_window.protocol("<KeyPress>", self.key_press_hander_preview_window)
+        self.preview_window.bind("<KeyPress>", self.key_press_preview_window_handler)
 
         preview_image_container = tk.Label(self.preview_window)
         preview_image_container.img = img
@@ -389,10 +392,11 @@ class MainFrame:
     def on_close(self):
         ask = messagebox.askyesno(title="Quit?", message="Do you want to quit?")
         if ask:
+            print("Bye.")
             self.root.destroy()
 
     def key_press_handler(self, event):
-        char = event.char
+        # char = event.char
         keysym = event.keysym
         keycode = event.keycode
 
@@ -408,6 +412,14 @@ class MainFrame:
             self.train_button_click()
         elif keysym == "d":
             self.detect_button_click()
+
+    def key_press_preview_window_handler(self, event):
+        keysym = event.keysym
+
+        if keysym == "Escape":
+            self.preview_window.destroy()
+        elif keysym == "Return":
+            self.flush_image()
 
     # def key_press_hander_preview_window(self, event):
     #     char = event.char
