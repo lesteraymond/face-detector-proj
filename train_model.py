@@ -14,7 +14,6 @@ class Train:
 
         for folder in os.listdir(self.dataset_folder):
             # if file.endswith(".png"):
-            # name = file.split("__")[0]
             folder_path = os.path.join(self.dataset_folder, folder)
 
             if os.path.isdir(folder_path):

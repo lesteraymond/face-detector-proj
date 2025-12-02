@@ -22,8 +22,6 @@ class Capture:
         if not os.path.exists(f"{self.dataset_path}/{folder_name}"):
             os.makedirs(f"{self.dataset_path}/{folder_name}")
 
-        # x, y, w, h = self.faces[0]
-        # face = self.frame[y : y + h, x : x + w]
         self.suff = randint(0, 1000000)
         file_name = (
             f"{self.dataset_path}/{folder_name}/{str(folder_name)[0]}__{self.suff}.png"
