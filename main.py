@@ -173,7 +173,7 @@ class MainFrame:
 
             # print(self.show_rec_value)
         else:
-            status_text = "No Face Detected"
+            # status_text = "No Face Detected"
             self.no_face_detected = True
 
         if self.show_rec_value.get() == 1 and not self.detect:
