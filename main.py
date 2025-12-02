@@ -3,6 +3,7 @@ import cv2
 import capture_dataset
 import train_model
 import os
+import shutil
 from PIL import ImageTk, Image
 from tkinter import messagebox
 from random import randint
@@ -126,12 +127,16 @@ class MainFrame:
 
         rec_pos_x = 0
         rec_pos_y = 0
+        rec_width = 0
+        rec_height = 0
         if len(faces) > 0:
             status_text = "Face Detected"
             self.no_face_detected = False
             for x, y, w, h in faces:
                 rec_pos_x = x
                 rec_pos_y = y
+                rec_width = w
+                rec_height = h
 
                 if self.detect:
                     if os.path.exists("model.yml"):
@@ -143,13 +148,22 @@ class MainFrame:
                         face_r = gray[y : y + h, x : x + w]
                         label, confidence = recog.predict(face_r)
 
+                        # if confidence < 70:
+                        #     status_text = "raymond"
+                        # else:
+                        #     status_text = "unknown"
+
+                        if confidence < 60:
+                            status_text = names.get(label, "unknown")
+                        else:
+                            status_text = "unknown"
+
+                        print(status_text, confidence)
+
                         if self.show_rec_value.get() == 1:
                             cv2.rectangle(
                                 self.f, (x, y), (x + w, y + h), (0, 255, 0), 2
                             )
-
-                        status_text = names.get(label, "unknown")
-                        print(status_text, confidence)
 
                         if self.show_txt_value.get() == 1:
                             cv2.putText(
@@ -168,7 +182,13 @@ class MainFrame:
             self.no_face_detected = True
 
         if self.show_rec_value.get() == 1 and not self.detect:
-            cv2.rectangle(self.f, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            cv2.rectangle(
+                self.f,
+                (rec_pos_x, rec_pos_y),
+                (rec_pos_x + rec_width, rec_pos_y + rec_height),
+                (0, 255, 0),
+                2,
+            )
 
         if self.show_txt_value.get() == 1 and not self.detect:
             cv2.putText(
@@ -204,49 +224,52 @@ class MainFrame:
             ]
             messagebox.showerror(
                 title="ERROR",
-                message=error_messages[randint(0, len(error_messages))],
+                message=error_messages[randint(0, len(error_messages) - 1)],
             )
         else:
             # self.flush_image()
             self.show_image_preview_window()
 
     def train_button_click(self):
-        files = os.listdir("dataset/")
+        dataset_folder = os.listdir("dataset")
 
-        if len(files) == 0:
-            messagebox.showerror("ERROR", "Walang laman ung dataset folder huhuhu")
-            return
+        for folder in dataset_folder:
+            folder_path = os.listdir(f"dataset/{folder}")
+            if len(dataset_folder) == 0:
+                messagebox.showerror("ERROR", "Walang laman ung dataset folder huhuhu")
+                return
 
-        if len(files) < 10:
-            error_messages = [
-                "Kulang pictures. Kailangan 10 o more.",
-                "Medyo konti pa images mo, dagdagan mo muna.",
-                "Dataset too small. Collect at least 10 pics.",
-                "Hindi pedeng magtrain, kulang images.",
-                "Add more photos muna bago magtrain.",
-                "Kulang pa yung pictures. Try mo magcapture ng madami.",
-                "Training failed. Need 10 or more images.",
-                "Konti pa yung images. Dagdagan mo bago magtrain.",
-                "Cannot proceed. Kulang pictures mo.",
-                "Add more pictures. Minimum 10 required para magtrain.",
-            ]
-            messagebox.showerror(
-                "ERROR", error_messages[randint(0, len(error_messages))]
-            )
-        else:
-            if os.path.exists("model.yml"):
-                os.remove("model.yml")
-            print("Training model..... please wait...")
-            train = train_model.Train()
-            train.save_model()
-            print("Training model done!")
+            if len(folder_path) < 10:
+                error_messages = [
+                    "Kulang pictures. Kailangan 10 o more.",
+                    "Medyo konti pa images mo, dagdagan mo muna.",
+                    "Dataset too small. Collect at least 10 pics.",
+                    "Hindi pedeng magtrain, kulang images.",
+                    "Add more photos muna bago magtrain.",
+                    "Kulang pa yung pictures. Try mo magcapture ng madami.",
+                    "Training failed. Need 10 or more images.",
+                    "Konti pa yung images. Dagdagan mo bago magtrain.",
+                    "Cannot proceed. Kulang pictures mo.",
+                    "Add more pictures. Minimum 10 required para magtrain.",
+                ]
+                messagebox.showerror(
+                    "ERROR", error_messages[randint(0, len(error_messages) - 1)]
+                )
+                return
+            else:
+                if os.path.exists("model.yml"):
+                    os.remove("model.yml")
+                print("Training model..... please wait...")
+                train = train_model.Train()
+                train.save_model()
+                print("Training model done!")
 
     def detect_button_click(self):
         self.show_rec_value.set(1)
         self.show_txt_value.set(1)
 
         if not os.path.exists("model.yml"):
-            messagebox.showerror("Please train model first!")
+            messagebox.showerror("ERROR", "Please train model first!")
             return
 
         if len(os.listdir("dataset/")) == 0:
@@ -264,9 +287,9 @@ class MainFrame:
 
         if len(os.listdir("dataset/")) > 0:
             if messagebox.askyesno("Delete?", "Do you want to continue?"):
-                for file in os.listdir("dataset/"):
-                    os.remove(f"dataset/{file}")
-                    print(f"{f'dataset/{file}'} Removed!")
+                for folder in os.listdir("dataset/"):
+                    shutil.rmtree(f"dataset/{folder}", ignore_errors=True)
+                    print(f"{f'dataset/{folder}'} Removed!")
 
                 messagebox.showinfo("Done", "Dataset folder was cleared!")
         else:

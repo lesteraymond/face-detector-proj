@@ -5,7 +5,7 @@ from random import randint
 
 class Capture:
     def __init__(self):
-        self.dataset_path = "dataset/"
+        self.dataset_path = "dataset"
         self.suff = 0
         ##
 
@@ -15,12 +15,19 @@ class Capture:
     def set_face(self, fc):
         self.face = fc
 
-    def write(self, file_name):
+    def write(self, folder_name):
         if not os.path.exists(self.dataset_path):
             os.makedirs(self.dataset_path)
+
+        if not os.path.exists(f"{self.dataset_path}/{folder_name}"):
+            os.makedirs(f"{self.dataset_path}/{folder_name}")
 
         # x, y, w, h = self.faces[0]
         # face = self.frame[y : y + h, x : x + w]
         self.suff = randint(0, 1000000)
-        file_name = f"{self.dataset_path}/{file_name}__{self.suff}.png"
-        cv2.imwrite(file_name, self.face)
+        file_name = (
+            f"{self.dataset_path}/{folder_name}/{str(folder_name)[0]}__{self.suff}.png"
+        )
+        resize = cv2.resize(self.face, (200, 200))
+        cv2.imwrite(file_name, resize)
+        print(f"{file_name} Saved!")
