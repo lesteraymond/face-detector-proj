@@ -18,7 +18,7 @@ class MainFrame:
             cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
         )
         self.recog = None
-        self.names = {0: "raymond"}
+        # self.names = {0: "raymond"}
         self.detect = False
 
         self.root = tk.Tk()
