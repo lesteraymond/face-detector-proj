@@ -126,11 +126,11 @@ class MainFrame:
 
         gray = cv2.cvtColor(self.f, cv2.COLOR_BGR2GRAY)
         faces = self.face_cascade.detectMultiScale(gray, 1.1, 5)
-
         rec_pos_x = 0
         rec_pos_y = 0
         rec_width = 0
         rec_height = 0
+        status_text = ""
         if len(faces) > 0:
             status_text = "Face Detected"
             self.no_face_detected = False

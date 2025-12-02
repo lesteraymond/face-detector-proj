@@ -23,9 +23,7 @@ class Capture:
             os.makedirs(f"{self.dataset_path}/{folder_name}")
 
         self.suff = randint(0, 1000000)
-        file_name = (
-            f"{self.dataset_path}/{folder_name}/{str(folder_name)[0]}__{self.suff}.png"
-        )
+        file_name = f"{self.dataset_path}/{folder_name}/face__{self.suff}.png"
         resize = cv2.resize(self.face, (200, 200))
         cv2.imwrite(file_name, resize)
         print(f"{file_name} Saved!")
