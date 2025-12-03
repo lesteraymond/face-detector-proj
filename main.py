@@ -18,7 +18,6 @@ class MainFrame:
             cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
         )
         self.recog = None
-        # self.names = {0: "raymond"}
         self.detect = False
 
         self.root = tk.Tk()
@@ -142,7 +141,11 @@ class MainFrame:
 
                 if self.detect:
                     if self.recog:
-                        names = {0: "raymond"}
+                        folder_name = ""
+                        for folder in os.listdir("dataset"):
+                            folder_name = folder
+
+                        names = {0: folder_name}
 
                         face_r = gray[y : y + h, x : x + w]
                         label, confidence = self.recog.predict(face_r)
@@ -285,11 +288,13 @@ class MainFrame:
         self.detect = False
 
     def clear_dataset_folder_button_click(self):
-        if os.path.exists("model.yml"):
-            os.remove("model.yml")
+        self.detect = False
 
         if len(os.listdir("dataset/")) > 0:
             if messagebox.askyesno("Delete?", "Do you want to continue?"):
+                if os.path.exists("model.yml"):
+                    os.remove("model.yml")
+
                 for folder in os.listdir("dataset/"):
                     shutil.rmtree(f"dataset/{folder}", ignore_errors=True)
                     print(f"{f'dataset/{folder}'} Removed!")
