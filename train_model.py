@@ -9,21 +9,21 @@ class Train:
         self.dataset_folder = "dataset"
         self.faces = []
         self.labels = []
-        self.label_map = {}
-        self.current_label = 0
+        # self.label_map = {}
+        # self.current_label = 0
 
         for folder in os.listdir(self.dataset_folder):
             # if file.endswith(".png"):
             folder_path = os.path.join(self.dataset_folder, folder)
 
             if os.path.isdir(folder_path):
-                name = folder
+                # name = folder
 
-                if name not in self.label_map:
-                    self.label_map[name] = self.current_label
-                    print(f"Found: {name}")
+                # if name not in self.label_map:
+                #     self.label_map[name] = self.current_label
+                print(f"Found: {folder}")
 
-                label = self.label_map[name]
+                # label = self.label_map[name]
 
                 for file in os.listdir(folder_path):
                     if file.endswith(".png"):
@@ -32,7 +32,7 @@ class Train:
                         # resize = cv2.resize(img, (200, 200))
 
                         self.faces.append(img)
-                        self.labels.append(label)
+                        self.labels.append(0)
                         print(f"Loaded: {file}")
 
             # if os.path.isdir(folder_name):

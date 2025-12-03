@@ -122,9 +122,11 @@ class MainFrame:
     def update_video_frame(self):
         r, self.f = self.video_capture.read()
         self.f = cv2.flip(self.f, 1)
+        self.clean_frame = self.f.copy()
 
         gray = cv2.cvtColor(self.f, cv2.COLOR_BGR2GRAY)
         faces = self.face_cascade.detectMultiScale(gray, 1.1, 5)
+
         rec_pos_x = 0
         rec_pos_y = 0
         rec_width = 0
@@ -317,8 +319,9 @@ class MainFrame:
         #     return
 
     def show_image_preview_window(self):
-        r, f = self.video_capture.read()
-        f = cv2.flip(f, 1)
+        # r, f = self.video_capture.read()
+        f = self.clean_frame
+        # f = cv2.flip(f, 1)
 
         gray = cv2.cvtColor(f, cv2.COLOR_BGR2GRAY)
         faces = self.face_cascade.detectMultiScale(gray, 1.1, 5)
