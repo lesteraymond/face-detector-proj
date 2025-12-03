@@ -21,7 +21,6 @@ class Train:
 
                 if name not in self.label_map:
                     self.label_map[name] = self.current_label
-                    self.current_label += 1
                     print(f"Found: {name}")
 
                 label = self.label_map[name]
