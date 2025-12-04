@@ -281,9 +281,9 @@ class MainFrame:
             messagebox.showerror("ERROR", "Walang laman ung dataset folder huhuhu")
             return
 
+        self.detect = True
         self.recog = cv2.face.LBPHFaceRecognizer_create()
         self.recog.read("model.yml")
-        self.detect = True
 
     def stop_detect_button_click(self):
         self.detect = False
