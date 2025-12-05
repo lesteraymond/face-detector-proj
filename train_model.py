@@ -20,6 +20,7 @@ class Train:
                 # name = folder
 
                 # if name not in self.label_map:
+                #     print("alyanna")
                 #     self.label_map[name] = self.current_label
                 print(f"Found: {folder}")
 
@@ -34,22 +35,6 @@ class Train:
                         self.faces.append(img)
                         self.labels.append(0)
                         print(f"Loaded: {file}")
-
-            # if os.path.isdir(folder_name):
-            #     name = folder_name
-            #     if name not in self.label_map:
-            #         print(name)
-            #         self.label_map[name] = self.current_label
-            #         self.current_label += 1
-
-            #     label = self.label_map[name]
-            #     image_path = os.path.join(self.dataset_folder, folder_name)
-            #     print(image_path)
-            #     img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-            #     # resize = cv2.resize(img, (200, 200))
-
-            # self.faces.append(img)
-            # self.labels.append(label)
 
     def save_model(self):
         faces = np.array(self.faces)

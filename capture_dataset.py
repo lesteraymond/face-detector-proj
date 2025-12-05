@@ -17,9 +17,11 @@ class Capture:
 
     def write(self, folder_name):
         if not os.path.exists(self.dataset_path):
+            # print("alyanna")
             os.makedirs(self.dataset_path)
 
         if not os.path.exists(f"{self.dataset_path}/{folder_name}"):
+            # print("hanni")
             os.makedirs(f"{self.dataset_path}/{folder_name}")
 
         self.suff = randint(0, 1000000)

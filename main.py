@@ -89,7 +89,6 @@ class MainFrame:
         )
         stop_detect_button.place(x=600, y=400, width=100)
 
-        #######
         capture_button_shortcut = tk.Label(
             self.root,
             font=("Arial", 10),
@@ -117,6 +116,10 @@ class MainFrame:
         # self.detect_button = tk.Button(self.root, font=("Arial", 10), text="DETECT")
         # self.detect_button.place(x=600, y=430, width=100)
 
+        # for debugging purposes
+        # alyanna
+        # hanni
+
         self.update_video_frame()
 
     def update_video_frame(self):
@@ -125,7 +128,7 @@ class MainFrame:
         self.clean_frame = self.f.copy()
 
         gray = cv2.cvtColor(self.f, cv2.COLOR_BGR2GRAY)
-        faces = self.face_cascade.detectMultiScale(gray, 1.1, 5)
+        faces = self.face_cascade.detectMultiScale(gray, 1.1, 4)
 
         rec_pos_x = 0
         rec_pos_y = 0
@@ -154,16 +157,20 @@ class MainFrame:
 
                         if confidence < 60:
                             status_text = names.get(label, "unknown")
+                            color = (0, 255, 0)
+                            # print("alyanna")
                         else:
                             status_text = "unknown"
+                            color = (0, 0, 255)
+                            # print("faith")
+
+                        # print(confidence)
 
                         print(f"status_text: {status_text}")
                         print(f"confidence: {confidence}")
 
                         if self.show_rec_value.get() == 1:
-                            cv2.rectangle(
-                                self.f, (x, y), (x + w, y + h), (0, 255, 0), 2
-                            )
+                            cv2.rectangle(self.f, (x, y), (x + w, y + h), color, 2)
 
                         if self.show_txt_value.get() == 1:
                             cv2.putText(
@@ -172,7 +179,7 @@ class MainFrame:
                                 (x, y - 10),
                                 cv2.FONT_HERSHEY_SIMPLEX,
                                 0.8,
-                                (0, 255, 0),
+                                color,
                                 2,
                             )
 
@@ -312,9 +319,11 @@ class MainFrame:
         self.preview_window.destroy()
 
         # if not self.no_face_detected:
+        # print("alyanna")
         #   self.cap.set_frame(self.prev_frame)
 
         # else:
+        # print("faith")
         #     messagebox.showerror("ERROR", "No Face Detected!")
         #     return
 
@@ -324,7 +333,7 @@ class MainFrame:
         # f = cv2.flip(f, 1)
 
         gray = cv2.cvtColor(f, cv2.COLOR_BGR2GRAY)
-        faces = self.face_cascade.detectMultiScale(gray, 1.1, 5)
+        faces = self.face_cascade.detectMultiScale(gray, 1.1, 4)
 
         x, y, w, h = faces[0]
         face = f[y : y + h, x : x + w]
@@ -394,6 +403,7 @@ class MainFrame:
         # print(self.preview_window.winfo_height())
 
     # def clear_entry(self):
+    #     print("hanni")
     #     self.person_name_entry.delete("1.0", "end")
 
     def on_close(self):
@@ -412,13 +422,19 @@ class MainFrame:
         # print(int(ord("q")))
 
         if keysym == "q":
+            # print("hanni")
             self.on_close()
         elif keysym == "c":
+            # print("alyanna")
             self.capture_button_click()
         elif keysym == "t":
+            # print("hanni")
             self.train_button_click()
         elif keysym == "d":
+            # print("alyanna")
             self.detect_button_click()
+        elif keysym == "s":
+            self.detect = False
 
     def key_press_preview_window_handler(self, event):
         keysym = event.keysym
@@ -435,9 +451,10 @@ class MainFrame:
 
     #     print(f"Keysym: {keysym} - Keycode: {keycode}")
     #     print(self.show_rec_value.get())
-    #     print("HANNI PHAM")
+    #     print("alyanna")
 
     #     if keysym == "Escape":
+    #         print("alyanna")
     #         self.preview_window.destroy()
 
     def show(self):
