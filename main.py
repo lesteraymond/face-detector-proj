@@ -124,6 +124,12 @@ class MainFrame:
 
     def update_video_frame(self):
         r, self.f = self.video_capture.read()
+
+        if not r:
+            messagebox.showerror("ERROR", "Camera not found!")
+            self.root.destroy()
+            return
+
         self.f = cv2.flip(self.f, 1)
         self.clean_frame = self.f.copy()
 
@@ -162,10 +168,9 @@ class MainFrame:
                         else:
                             status_text = "unknown"
                             color = (0, 0, 255)
-                            # print("faith")
+                            # print("hanni")
 
                         # print(confidence)
-
                         print(f"status_text: {status_text}")
                         print(f"confidence: {confidence}")
 
@@ -251,10 +256,10 @@ class MainFrame:
 
             if len(folder_path) < 10:
                 error_messages = [
-                    "Kulang pictures. Kailangan 10 o more.",
+                    "Kulang pictures. Kailangan 10 or more.",
                     "Medyo konti pa images mo, dagdagan mo muna.",
                     "Dataset too small. Collect at least 10 pics.",
-                    "Hindi pedeng magtrain, kulang images.",
+                    "Hindi pedeng magtrain haha, kulang images.",
                     "Add more photos muna bago magtrain.",
                     "Kulang pa yung pictures. Try mo magcapture ng madami.",
                     "Training failed. Need 10 or more images.",
