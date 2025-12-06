@@ -223,7 +223,7 @@ class MainFrame:
         if self.no_face_detected:
             error_messages = [
                 "Walang face na nakita. Paki try ulit.",
-                "Hindi ka na detect ng camera. Ayusin mo lang pwesto mo.",
+                "Hindi ka nadetect ng camera. Ayusin mo lang pwesto mo.",
                 "No face found. Check mo lighting or distance.",
                 "hindi ka makita. Try mo lumapit konti.",
                 "Camera cannot detect any face. Please try again.",
