@@ -11,6 +11,7 @@ from random import randint
 
 class MainFrame:
     def __init__(self):
+        self.__version__ = "3.3.5"
         self.video_capture = cv2.VideoCapture(0)
         self.cap = capture_dataset.Capture()
 
@@ -121,6 +122,7 @@ class MainFrame:
         # alyanna
         # hanni
 
+        print(f"Version: {self.__version__}")
         self.update_video_frame()
 
     def update_video_frame(self):
@@ -462,6 +464,9 @@ class MainFrame:
     #     if keysym == "Escape":
     #         print("alyanna")
     #         self.preview_window.destroy()
+
+    def show_version(self):
+        return self.__version__
 
     def show(self):
         self.root.mainloop()
