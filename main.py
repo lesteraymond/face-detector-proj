@@ -11,7 +11,7 @@ from random import randint
 
 class MainFrame:
     def __init__(self):
-        self.__version__ = "3.3.5"
+        self.__version__ = "3.3.6"
         self.video_capture = cv2.VideoCapture(0)
         self.cap = capture_dataset.Capture()
 
